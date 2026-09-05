@@ -12,7 +12,6 @@ export default function TabsLayout() {
           tabBarIcon: ({ color }) => <HomeIcon size={28} color={color} />,
         }}
       />
-
       <Tabs.Screen
         name="bookings"
         options={{
