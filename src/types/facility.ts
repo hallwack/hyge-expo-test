@@ -1,4 +1,4 @@
-type FacilityType = "STANDARD" | "PANORAMIC" | "VIP" | "INDOOR" | "OUTDOOR";
+export type FacilityType = "STANDARD" | "PANORAMIC" | "VIP";
 
 export interface Facility {
   id: string;
@@ -14,12 +14,12 @@ export interface Facility {
 export interface FacilityDetail {
   id: string;
   name: string;
-  location: string;
-  distanceKm: number;
+  description: string;
+  address: string;
+  rating: number;
   reviewCount: number;
-  sports: string[];
-  startingPrice: number;
   imageUrl: string;
+  sports: string[];
   amenities: string[];
   courts: Court[];
 }
