@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "temp-app",
-    "slug": "temp-app",
+    "name": "hyge-interview-react-native",
+    "slug": "hyge-interview-react-native",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "tempapp",
+    "scheme": "hygeinterviewreactnative",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
