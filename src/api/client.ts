@@ -99,9 +99,7 @@ export async function api<T>(
       );
     }
 
-    return (
-      data && typeof data === "object" && "data" in data ? data.data : data
-    ) as T;
+    return data as T;
   }
 
   return parse(await doFetch(url, opts, token));
