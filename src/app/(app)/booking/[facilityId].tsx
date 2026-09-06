@@ -53,8 +53,6 @@ export default function FacilityBooking() {
       selectedBooking?.slot.startTime === slot.startTime &&
       selectedBooking?.slot.endTime === slot.endTime;
 
-    console.log("Same Slot Selected:", isSameSlot);
-
     if (isSameSlot) {
       setSelectedBooking(null);
       return;
