@@ -24,6 +24,10 @@ export function useCreateBooking() {
   return useMutation<Booking, Error, CreateBooking>({
     mutationKey: ["bookings", "create"],
     mutationFn: (payload) => bookingApi.create(payload),
+    onSuccess: (_, __, ___, ctx) =>
+      ctx.client.invalidateQueries({
+        queryKey: ["bookings", "infinite"],
+      }),
   });
 }
 
