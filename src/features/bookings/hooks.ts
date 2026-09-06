@@ -1,6 +1,24 @@
 import { Booking, CreateBooking } from "@/types/booking";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { bookingApi } from "./api";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
+import { bookingApi, BookingListParams } from "./api";
+
+export function useInfiniteBookings(params: Omit<BookingListParams, "page">) {
+  return useInfiniteQuery({
+    queryKey: ["bookings", "infinite", params],
+    queryFn: ({ pageParam = 1 }) =>
+      bookingApi.list({ ...params, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+  });
+}
 
 export function useCreateBooking() {
   return useMutation<Booking, Error, CreateBooking>({
@@ -9,11 +27,11 @@ export function useCreateBooking() {
   });
 }
 
-export function useBookingList() {
+export function useBookingList(params: BookingListParams) {
   return useQuery({
     queryKey: ["bookings", "list"],
-    queryFn: () => bookingApi.list(),
-    staleTime: 1000 * 60 * 5,
+    queryFn: () => bookingApi.list(params),
+    placeholderData: keepPreviousData,
   });
 }
 
