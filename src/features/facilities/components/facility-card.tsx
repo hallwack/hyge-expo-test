@@ -1,8 +1,8 @@
+import SafeImage from "@/components/custom/safe-image";
 import { priceFormat } from "@/libs/format";
 import { Tokens } from "@/theme/tokens";
 import { Facility } from "@/types/facility";
 import { Link } from "expo-router";
-import { SportShoeIcon } from "lucide-react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface FacilityCardProps {
@@ -29,14 +29,13 @@ export default function FacilityCard({ facility, tokens }: FacilityCardProps) {
         ])}
       >
         <View style={styles.cardContent}>
-          <View
-            style={[
-              styles.cardImagePlaceholder,
-              { backgroundColor: tokens.primary + "20" },
-            ]}
-          >
-            <SportShoeIcon size={40} />
-          </View>
+          <SafeImage
+            source={facility.imageUrl}
+            style={styles.cardImagePlaceholder}
+            iconSize={32}
+            iconColor={tokens["muted-foreground"]}
+            backgroundColor={tokens.muted}
+          />
           <View style={styles.cardInfo}>
             <Text style={[styles.cardName, { color: tokens.foreground }]}>
               {facility.name}
