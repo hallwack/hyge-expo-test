@@ -100,7 +100,7 @@ export default function Login() {
       <Button
         variant="ghost"
         size="default"
-        onPress={() => router.push("/(app)/(tabs)")}
+        onPress={() => router.push("/(auth)/register")}
         style={{ marginTop: 8 }}
       >
         Don't have an account? Register
