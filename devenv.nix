@@ -21,8 +21,8 @@ in
 
   android = {
     enable = true;
-    platforms.version = ["35"];
-    buildTools.version = ["35.0.0"];
+    platforms.version = ["35" "36"];
+    buildTools.version = ["35.0.0" "36.0.0"];
     reactNative.enable = true;
     emulator.enable = true;
     cmdLineTools.version = "11.0";
@@ -31,7 +31,8 @@ in
     abis = [ "x86_64" ];
     systemImageTypes = [ "default" ];
 
-    ndk.enable = false;
+    ndk.enable = true;
+    ndk.version = ["27.1.12297006"];
     sources.enable = false;
     googleTVAddOns.enable = false;
     android-studio.enable = false;
@@ -39,6 +40,7 @@ in
 
   packages = with pkgs; [
     watchman
+    android-tools
   ];
 
   # packages = [
@@ -99,9 +101,16 @@ in
 
     # Build APK release
     build-apk.exec = ''
-      echo "📦 Building APK release..."
+      set -e
+      echo "📦 Building Courtly Android APK release..."
       npx expo prebuild --platform android
-      cd android && ./gradlew assembleRelease
+
+      cd android 
+      ./gradlew assembleRelease
+
+      mkdir -p ../release
+      cp app/build/outputs/apk/release/app-release.apk ../release/courtly-release.apk
+
       echo ""
       echo "✅ APK berhasil dibuild:"
       find . -name "*.apk" -path "*/release/*" | head -5
