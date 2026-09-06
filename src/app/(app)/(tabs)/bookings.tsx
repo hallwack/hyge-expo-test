@@ -1,22 +1,31 @@
 import EmptyState from "@/components/custom/empty";
 import ErrorState from "@/components/custom/error";
 import LoadingState from "@/components/custom/loading";
+import { Alert } from "@/components/ui/alert";
 import { BookingStatusParams } from "@/features/bookings/api";
 import BookingCard from "@/features/bookings/components/booking-card";
+import { CancelBookingModal } from "@/features/bookings/components/modal-delete-booking";
 import StatusFilter from "@/features/bookings/components/status-filter";
-import { useInfiniteBookings } from "@/features/bookings/hooks";
-import Header from "@/features/facilities/components/header";
+import {
+  useCancelBooking,
+  useInfiniteBookings,
+} from "@/features/bookings/hooks";
 import { useTheme } from "@/theme/ThemeProvider";
 import { Booking } from "@/types/booking";
+import { CheckCircle2Icon, InfoIcon } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
 import { View, StyleSheet, FlatList, RefreshControl, Text } from "react-native";
 
 export default function Bookings() {
-  const { tokens } = useTheme();
+  const { tokens, theme } = useTheme();
 
   const [selectedStatus, setSelectedStatus] = useState<
     BookingStatusParams | undefined
   >(undefined);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
+    null,
+  );
+  const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
 
   const {
     data,
@@ -32,10 +41,25 @@ export default function Bookings() {
     status: selectedStatus,
   });
 
+  const cancelBookingMutation = useCancelBooking();
+
   const bookings = useMemo(
     () => data?.pages.flatMap((page) => page.data) ?? [],
     [data],
   );
+
+  const handleCancelBooking = () => {
+    if (!selectedBookingId) return;
+
+    cancelBookingMutation.mutate(selectedBookingId, {
+      onSuccess: () => {
+        setSelectedBookingId(null);
+        setShowCancelConfirmation(true);
+
+        setTimeout(() => setShowCancelConfirmation(false), 3000);
+      },
+    });
+  };
 
   const handleLoadMore = useCallback(() => {
     if (!hasNextPage || isFetchingNextPage) return;
@@ -50,7 +74,11 @@ export default function Bookings() {
 
   const renderBooking = useCallback(
     ({ item }: { item: Booking }): React.ReactElement => (
-      <BookingCard booking={item} tokens={tokens} />
+      <BookingCard
+        booking={item}
+        tokens={tokens}
+        onCancel={(bookingId: string) => setSelectedBookingId(bookingId)}
+      />
     ),
     [tokens],
   );
@@ -105,8 +133,36 @@ export default function Bookings() {
     renderBooking,
     renderFooter,
   ]);
+
   return (
     <View style={[styles.container, { backgroundColor: tokens.background }]}>
+      {showCancelConfirmation && (
+        <View style={styles.alertPadding}>
+          <Alert
+            variant="success"
+            tone="soft"
+            theme={theme}
+            icon={<CheckCircle2Icon size={18} color="#10B981" />}
+            title="Berhasil Dibatalakan"
+            description="Booking Anda telah resmi dibatalkan."
+          />
+        </View>
+      )}
+
+      {cancelBookingMutation.isError && (
+        <View style={styles.alertPadding}>
+          <Alert
+            variant="destructive"
+            tone="soft"
+            theme={theme}
+            icon={<InfoIcon size={18} color="#EF4444" />}
+            title="Gagal Membatalkan"
+            description={
+              cancelBookingMutation.error?.message || "Terjadi kesalahan."
+            }
+          />
+        </View>
+      )}
       <View
         style={[
           styles.header,
@@ -134,6 +190,13 @@ export default function Bookings() {
       ) : (
         renderContent()
       )}
+
+      <CancelBookingModal
+        visible={!!selectedBookingId}
+        isLoading={cancelBookingMutation.isPending}
+        onClose={() => setSelectedBookingId(null)}
+        onConfirm={handleCancelBooking}
+      />
     </View>
   );
 }
@@ -160,5 +223,9 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 24,
     fontWeight: "bold",
+  },
+  alertPadding: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
   },
 });
