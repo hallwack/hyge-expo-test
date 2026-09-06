@@ -11,7 +11,13 @@ import { useTheme } from "@/theme/ThemeProvider";
 import { AvailabilityCourt, AvailabilitySlot } from "@/types/availability";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 export default function FacilityBooking() {
   const { facilityId } = useLocalSearchParams<{ facilityId: string }>();
@@ -33,6 +39,7 @@ export default function FacilityBooking() {
   const {
     data: availability,
     isPending,
+    isRefetching,
     error,
     refetch,
   } = useAvailability(facilityId, formattedBookingDate);
@@ -83,7 +90,7 @@ export default function FacilityBooking() {
       price: selectedBooking.slot.price,
     });
 
-    router.push("/booking/confirmation");
+    router.push("/(app)/booking/confirmation");
   };
 
   useEffect(() => {
@@ -104,6 +111,14 @@ export default function FacilityBooking() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            colors={[tokens.primary]}
+            tintColor={tokens.primary}
+          />
+        }
       >
         <DateInput
           label="Booking Date"
@@ -125,6 +140,7 @@ export default function FacilityBooking() {
           {!isPending && !error && availability && (
             <AvailabilityView
               data={availability}
+              selectedBooking={selectedBooking}
               onSelectSlot={handleSelectSlot}
             />
           )}
