@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ActivityIndicator, Image } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/theme/ThemeProvider";
 import { useBookingStore } from "@/stores/booking-store";
@@ -7,6 +7,7 @@ import { Booking } from "@/types/booking";
 import { priceFormat } from "@/libs/format";
 import BackButton from "@/components/custom/back-button";
 import { Button } from "@/components/ui/button";
+import SafeImage from "@/components/custom/safe-image";
 
 export default function BookingConfirmation() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function BookingConfirmation() {
     return (
       <View style={[styles.container, { backgroundColor: tokens.background }]}>
         <Text style={{ color: tokens.foreground }}>
-          Data booking tidak ditemukan.
+          Booking draft not found. Please go back and select a booking.
         </Text>
       </View>
     );
@@ -57,9 +58,12 @@ export default function BookingConfirmation() {
           { backgroundColor: tokens.card, borderColor: tokens.border },
         ]}
       >
-        <Image
-          source={{ uri: facility.imageUrl }}
+        <SafeImage
+          source={facility.imageUrl}
           style={[styles.image, { borderRadius: tokens.radius.md }]}
+          iconSize={32}
+          iconColor={tokens["muted-foreground"]}
+          backgroundColor={tokens.muted}
         />
         <View style={{ gap: 4 }}>
           <Text
