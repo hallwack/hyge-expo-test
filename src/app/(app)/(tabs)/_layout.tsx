@@ -1,12 +1,17 @@
 import { useTheme } from "@/theme/ThemeProvider";
 import { Tabs } from "expo-router";
-import { CalendarCheckIcon, HomeIcon } from "lucide-react-native";
+import { CalendarCheckIcon, HomeIcon, UserIcon } from "lucide-react-native";
 
 export default function TabsLayout() {
   const { tokens } = useTheme();
 
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: tokens.primary, tabBarInactiveTintColor: tokens["muted-foreground"] }}>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: tokens.primary,
+        tabBarInactiveTintColor: tokens["muted-foreground"],
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -23,6 +28,14 @@ export default function TabsLayout() {
           tabBarIcon: ({ color }) => (
             <CalendarCheckIcon size={28} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          headerShown: false,
+          tabBarIcon: ({ color }) => <UserIcon size={28} color={color} />,
         }}
       />
     </Tabs>
