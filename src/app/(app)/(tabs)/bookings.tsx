@@ -64,12 +64,13 @@ export default function Bookings() {
 
   return (
     <View style={[styles.container, { backgroundColor: tokens.background }]}>
-      <BookingAlert
-        showSuccess={showCancelConfirmation}
-        errorMessage={cancelBookingMutation.error?.message}
-        theme={theme}
-        onClearError={() => cancelBookingMutation.reset()}
-      />
+      {(showCancelConfirmation || cancelBookingMutation.isError) && (
+        <BookingAlert
+          showSuccess={showCancelConfirmation}
+          errorMessage={cancelBookingMutation.error?.message || null}
+          theme={theme}
+        />
+      )}
 
       <View
         style={[
