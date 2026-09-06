@@ -1,6 +1,7 @@
 import { Tokens } from "@/theme/tokens";
 import { SearchIcon } from "lucide-react-native";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { Button } from "../ui/button";
 
 interface EmptyStateProps {
   onRefresh: () => void;
@@ -17,19 +18,9 @@ export default function EmptyState({ onRefresh, tokens }: EmptyStateProps) {
       <Text style={[styles.stateText, { color: tokens["muted-foreground"] }]}>
         Try adjusting your filters
       </Text>
-      <TouchableOpacity
-        onPress={onRefresh}
-        style={[styles.refreshButton, { backgroundColor: tokens.primary }]}
-      >
-        <Text
-          style={[
-            styles.refreshButtonText,
-            { color: tokens["primary-foreground"] },
-          ]}
-        >
-          Refresh
-        </Text>
-      </TouchableOpacity>
+      <Button variant="default" size="sm" onPress={onRefresh}>
+        Refresh
+      </Button>
     </View>
   );
 }
@@ -48,16 +39,8 @@ const styles = StyleSheet.create({
   },
   stateText: {
     fontSize: 14,
+    marginBottom: 12,
     marginTop: 4,
     textAlign: "center",
-  },
-  refreshButton: {
-    marginTop: 16,
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  refreshButtonText: {
-    fontWeight: "600",
   },
 });

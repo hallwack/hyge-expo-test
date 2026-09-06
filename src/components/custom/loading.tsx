@@ -10,7 +10,7 @@ export default function LoadingState({ tokens }: LoadingStateProps) {
     <View style={styles.stateContainer}>
       <ActivityIndicator size="large" color={tokens.primary} />
       <Text style={[styles.stateText, { color: tokens["muted-foreground"] }]}>
-        Loading facilities...
+        Loading data...
       </Text>
     </View>
   );

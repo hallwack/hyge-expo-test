@@ -1,6 +1,7 @@
 import { Tokens } from "@/theme/tokens";
 import { TriangleAlertIcon } from "lucide-react-native";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { Button } from "../ui/button";
 
 interface ErrorStateProps {
   error: string;
@@ -22,19 +23,9 @@ export default function ErrorState({
       <Text style={[styles.stateText, { color: tokens["muted-foreground"] }]}>
         {error}
       </Text>
-      <TouchableOpacity
-        onPress={onRetry}
-        style={[styles.retryButton, { backgroundColor: tokens.destructive }]}
-      >
-        <Text
-          style={[
-            styles.retryButtonText,
-            { color: tokens["destructive-foreground"] },
-          ]}
-        >
-          Try Again
-        </Text>
-      </TouchableOpacity>
+      <Button variant="default" size="sm" onPress={onRetry}>
+        Try Again
+      </Button>
     </View>
   );
 }
@@ -54,15 +45,7 @@ const styles = StyleSheet.create({
   stateText: {
     fontSize: 14,
     marginTop: 4,
+    marginBottom: 12,
     textAlign: "center",
-  },
-  retryButton: {
-    marginTop: 16,
-    paddingHorizontal: 24,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    fontWeight: "600",
   },
 });
