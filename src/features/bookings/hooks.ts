@@ -43,9 +43,13 @@ export function useBookingDetail(bookingId: string) {
   });
 }
 
-export function useDeleteBooking() {
+export function useCancelBooking() {
   return useMutation<void, Error, string>({
-    mutationKey: ["bookings", "delete"],
-    mutationFn: (bookingId) => bookingApi.delete(bookingId),
+    mutationKey: ["bookings", "cancel"],
+    mutationFn: (bookingId) => bookingApi.cancel(bookingId),
+    onSuccess: (_, __, ___, ctx) =>
+      ctx.client.invalidateQueries({
+        queryKey: ["bookings", "infinite"],
+      }),
   });
 }

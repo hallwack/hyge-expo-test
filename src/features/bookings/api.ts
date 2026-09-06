@@ -18,6 +18,6 @@ export const bookingApi = {
 
   detail: (bookingId: string) => api<Booking>(`/v1/bookings/${bookingId}`),
 
-  delete: (bookingId: string) =>
+  cancel: (bookingId: string) =>
     api<void>(`/v1/bookings/${bookingId}`, { method: "DELETE" }),
 };
