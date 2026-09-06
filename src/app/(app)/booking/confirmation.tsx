@@ -34,8 +34,8 @@ export default function BookingConfirmation() {
       onSuccess: (bookingResult: Booking) => {
         clearBookingDraft();
         router.replace({
-          pathname: "/booking/status",
-          params: { bookingId: bookingResult.id },
+          pathname: "/(app)/booking/status",
+          params: { bookingId: bookingResult.id, from: "checkout" },
         });
       },
       onError: (error) => {

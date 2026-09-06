@@ -1,4 +1,10 @@
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  RefreshControl,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTheme } from "@/theme/ThemeProvider";
 import { BookingStatus } from "@/types/booking";
@@ -13,10 +19,14 @@ import SafeImage from "@/components/custom/safe-image";
 export default function BookingStatusPage() {
   const router = useRouter();
   const { tokens } = useTheme();
-  const { bookingId } = useLocalSearchParams<{ bookingId: string }>();
+  const { bookingId, from } = useLocalSearchParams<{
+    bookingId: string;
+    from?: "checkout" | "list";
+  }>();
 
   const {
     data: bookingData,
+    isRefetching,
     isPending,
     error,
     refetch,
@@ -55,11 +65,37 @@ export default function BookingStatusPage() {
 
   const statusBadge = getStatusBadge(bookingData.status);
 
+  const isFromCheckout = from === "checkout";
+
+  const buttonConfig = isFromCheckout
+    ? {
+        label: "Back to Home",
+        onPress: () => router.replace("/(app)/(tabs)"), // Kembali ke Tab Utama/Home
+      }
+    : {
+        label: "Back to Bookings",
+        onPress: () => {
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace("/(app)/(tabs)/bookings");
+          }
+        },
+      };
+
   return (
     <View style={[styles.container, { backgroundColor: tokens.background }]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={refetch}
+            colors={[tokens.primary]}
+            tintColor={tokens.primary}
+          />
+        }
       >
         <View style={styles.header}>
           <View
@@ -216,7 +252,7 @@ export default function BookingStatusPage() {
           { backgroundColor: tokens.card, borderTopColor: tokens.border },
         ]}
       >
-        <Button onPress={() => router.replace("/")}>Back to Home</Button>
+        <Button onPress={buttonConfig.onPress}>{buttonConfig.label}</Button>
       </View>
     </View>
   );
