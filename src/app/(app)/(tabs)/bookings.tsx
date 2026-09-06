@@ -1,20 +1,15 @@
-import EmptyState from "@/components/custom/empty";
-import ErrorState from "@/components/custom/error";
-import LoadingState from "@/components/custom/loading";
-import { Alert } from "@/components/ui/alert";
 import { BookingStatusParams } from "@/features/bookings/api";
-import BookingCard from "@/features/bookings/components/booking-card";
-import { CancelBookingModal } from "@/features/bookings/components/modal-delete-booking";
+import BookingAlert from "@/features/bookings/components/booking-alert";
+import { CancelBookingModal } from "@/features/bookings/components/booking-cancel-modal";
+import BookingList from "@/features/bookings/components/booking-list";
 import StatusFilter from "@/features/bookings/components/status-filter";
 import {
   useCancelBooking,
   useInfiniteBookings,
 } from "@/features/bookings/hooks";
 import { useTheme } from "@/theme/ThemeProvider";
-import { Booking } from "@/types/booking";
-import { CheckCircle2Icon, InfoIcon } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
-import { View, StyleSheet, FlatList, RefreshControl, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function Bookings() {
   const { tokens, theme } = useTheme();
@@ -67,102 +62,15 @@ export default function Bookings() {
     fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const renderFooter = useCallback((): React.ReactElement | null => {
-    if (!isFetchingNextPage) return null;
-    return <LoadingState tokens={tokens} />;
-  }, [isFetchingNextPage, tokens]);
-
-  const renderBooking = useCallback(
-    ({ item }: { item: Booking }): React.ReactElement => (
-      <BookingCard
-        booking={item}
-        tokens={tokens}
-        onCancel={(bookingId: string) => setSelectedBookingId(bookingId)}
-      />
-    ),
-    [tokens],
-  );
-
-  const renderContent = useCallback((): React.ReactElement => {
-    if (isError) {
-      return (
-        <ErrorState
-          error={
-            error?.message || "Failed to load bookings. Please try again later."
-          }
-          onRetry={() => refetch()}
-          tokens={tokens}
-        />
-      );
-    }
-
-    if (bookings.length === 0 && !isLoading) {
-      return <EmptyState onRefresh={refetch} tokens={tokens} />;
-    }
-
-    return (
-      <FlatList
-        data={bookings}
-        renderItem={renderBooking}
-        keyExtractor={(item: Booking): string => item.id}
-        contentContainerStyle={styles.listContent}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={renderFooter}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching && !isFetchingNextPage}
-            onRefresh={refetch}
-            colors={[tokens.primary]}
-            tintColor={tokens.primary}
-          />
-        }
-        showsVerticalScrollIndicator={false}
-      />
-    );
-  }, [
-    bookings,
-    isLoading,
-    isError,
-    error,
-    isRefetching,
-    isFetchingNextPage,
-    tokens,
-    refetch,
-    handleLoadMore,
-    renderBooking,
-    renderFooter,
-  ]);
-
   return (
     <View style={[styles.container, { backgroundColor: tokens.background }]}>
-      {showCancelConfirmation && (
-        <View style={styles.alertPadding}>
-          <Alert
-            variant="success"
-            tone="soft"
-            theme={theme}
-            icon={<CheckCircle2Icon size={18} color="#10B981" />}
-            title="Berhasil Dibatalakan"
-            description="Booking Anda telah resmi dibatalkan."
-          />
-        </View>
-      )}
+      <BookingAlert
+        showSuccess={showCancelConfirmation}
+        errorMessage={cancelBookingMutation.error?.message}
+        theme={theme}
+        onClearError={() => cancelBookingMutation.reset()}
+      />
 
-      {cancelBookingMutation.isError && (
-        <View style={styles.alertPadding}>
-          <Alert
-            variant="destructive"
-            tone="soft"
-            theme={theme}
-            icon={<InfoIcon size={18} color="#EF4444" />}
-            title="Gagal Membatalkan"
-            description={
-              cancelBookingMutation.error?.message || "Terjadi kesalahan."
-            }
-          />
-        </View>
-      )}
       <View
         style={[
           styles.header,
@@ -185,11 +93,18 @@ export default function Bookings() {
         tokens={tokens}
       />
 
-      {isLoading && bookings.length === 0 ? (
-        <LoadingState tokens={tokens} />
-      ) : (
-        renderContent()
-      )}
+      <BookingList
+        bookings={bookings}
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        isRefetching={isRefetching}
+        isFetchingNextPage={isFetchingNextPage}
+        tokens={tokens}
+        onRefresh={refetch}
+        onLoadMore={handleLoadMore}
+        onCancelBooking={(id) => setSelectedBookingId(id)}
+      />
 
       <CancelBookingModal
         visible={!!selectedBookingId}
@@ -205,10 +120,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  listContent: {
-    paddingVertical: 8,
-    paddingBottom: 24,
-  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -223,9 +134,5 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 24,
     fontWeight: "bold",
-  },
-  alertPadding: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
   },
 });

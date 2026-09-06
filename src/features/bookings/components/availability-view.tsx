@@ -5,45 +5,26 @@ import {
   AvailabilityCourt,
   AvailabilitySlot,
 } from "@/types/availability";
-import { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 interface CourtSlotsProps {
   data: Availability;
   onSelectSlot?: (court: AvailabilityCourt, slot: AvailabilitySlot) => void;
+  selectedBooking: {
+    court: AvailabilityCourt;
+    slot: AvailabilitySlot;
+  } | null;
 }
 
 export default function AvailabilityView({
   data,
   onSelectSlot,
+  selectedBooking,
 }: CourtSlotsProps) {
   const { tokens } = useTheme();
-  const [selectedSlot, setSelectedSlot] = useState<{
-    courtId: string;
-    startTime: string;
-    endTime: string;
-  } | null>(null);
 
   const handleSelect = (court: AvailabilityCourt, slot: AvailabilitySlot) => {
     if (!slot.available) return;
-
-    const isSameSlot =
-      selectedSlot?.courtId === court.id &&
-      selectedSlot?.startTime === slot.startTime &&
-      selectedSlot?.endTime === slot.endTime;
-
-    if (isSameSlot) {
-      setSelectedSlot(null);
-      if (onSelectSlot) onSelectSlot(court, slot);
-      return;
-    }
-
-    setSelectedSlot({
-      courtId: court.id,
-      startTime: slot.startTime,
-      endTime: slot.endTime,
-    });
-
     if (onSelectSlot) onSelectSlot(court, slot);
   };
 
@@ -87,9 +68,9 @@ export default function AvailabilityView({
               const slotKey = `${court.id}-${slot.startTime}-${slot.endTime}`;
 
               const isSelected =
-                selectedSlot?.courtId === court.id &&
-                selectedSlot?.startTime === slot.startTime &&
-                selectedSlot?.endTime === slot.endTime;
+                selectedBooking?.court.id === court.id &&
+                selectedBooking?.slot.startTime === slot.startTime &&
+                selectedBooking?.slot.endTime === slot.endTime;
 
               const isAvailable = slot.available;
 

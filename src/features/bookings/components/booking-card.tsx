@@ -35,7 +35,20 @@ export default function BookingCard({
   };
 
   const statusStyle = getStatusBadge(booking.status);
-  const isCancelled = booking.status === "CANCELLED";
+
+  const formattedTime =
+    booking.startTime.length === 5
+      ? `${booking.startTime}:00`
+      : booking.startTime;
+
+  const lastCancellableInMs = 30 * 60 * 1000; // 30 minutes in milliseconds
+  const bookingDateTime = new Date(`${booking.date}T${formattedTime}`);
+
+  const isValidDate = !isNaN(bookingDateTime.getTime());
+  const isCancellable =
+    booking.status === "CONFIRMED" &&
+    isValidDate &&
+    bookingDateTime.getTime() - Date.now() > lastCancellableInMs;
 
   return (
     <Link
@@ -106,7 +119,7 @@ export default function BookingCard({
             </Text>
           </View>
 
-          {!isCancelled && (
+          {isCancellable && (
             <Button
               size="sm"
               variant="destructive"
