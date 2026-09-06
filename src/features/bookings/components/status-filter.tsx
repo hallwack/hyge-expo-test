@@ -38,11 +38,11 @@ export default function StatusFilter({
     >
       <View style={styles.filterGroup}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {FILTER_OPTIONS.map((option) => {
+          {FILTER_OPTIONS.map((option, index) => {
             const isActive = selectedStatus === option.value;
             return (
               <TouchableOpacity
-                key={option.value}
+                key={index}
                 onPress={() => onSelectStatus(option.value)}
                 style={[
                   styles.chip,
