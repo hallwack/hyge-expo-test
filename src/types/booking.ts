@@ -1,4 +1,4 @@
-type BookingStatus = "COMPLETED" | "CONFIRMED" | "CANCELLED";
+export type BookingStatus = "COMPLETED" | "CONFIRMED" | "CANCELLED";
 
 export interface CreateBooking {
   courtId: string;
