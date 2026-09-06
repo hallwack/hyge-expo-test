@@ -1,56 +1,217 @@
-# Welcome to your Expo app 👋
+# Courtly
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Courtly is an Expo/React Native mobile application for discovering sports facilities, viewing court details, checking availability, making bookings, and managing user bookings.
 
-## Get started
+This document describes the implementation currently available in the repository and maps it to the Hyge take-home test requirements.
 
-1. Install dependencies
+## Implementation summary
 
-   ```bash
-   npm install
-   ```
+| Requirement | Implementation |
+| --- | --- |
+| Expo + TypeScript + React Native | Expo SDK `57.0.20`, React Native `0.86.3`, TypeScript |
+| Registration | Registration screen and `POST /v1/auth/register` |
+| Login | Login screen and `POST /v1/auth/login` |
+| JWT storage | `expo-secure-store` for the access token and user data |
+| Facility list | Infinite pagination, pull-to-refresh, search, sport filter, and city filter |
+| Facility detail | Description, address, rating, amenities, sports, and courts |
+| Availability | Date picker, court slots, available/booked states, and slot pricing |
+| Create booking | Booking review followed by `POST /v1/bookings` |
+| My bookings | Upcoming/past/cancelled filters, pagination, refresh, and cancellation |
+| Booking detail | Receipt/status screen with reference, schedule, price, and status |
+| Navigation | Expo Router with auth stack, app stack, and bottom tabs |
 
-2. Start the app
+## Tech stack
 
-   ```bash
-   npx expo start
-   ```
+- React Native with Expo SDK 57
+- TypeScript
+- Expo Router
+- TanStack Query for fetching, caching, pagination, invalidation, loading, and error states
+- Zustand for authentication state and the booking draft
+- React Hook Form + Zod for login and registration validation
+- `@react-native-community/datetimepicker` for date selection
+- `lucide-react-native` for icons
 
-In the output, you'll find options to open the app in a
+Expo SDK 57 targets React Native 0.86, React 19.2, and requires Node.js 22.13.x or later. Reference: [Expo SDK 57 documentation](https://docs.expo.dev/versions/v57.0.0/).
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Expo modules used
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+The project uses more than three Expo SDK modules beyond core React Native:
 
-## Get a fresh project
+1. `expo-secure-store` — securely stores the access token and user data on the device.
+2. `expo-image` — displays facility images with a fallback when an image URL fails.
+3. `expo-linear-gradient` — provides the gradient overlay used in the facility detail hero image.
+4. `expo-router` — provides file-based navigation for auth, tabs, details, and the booking flow.
+5. `expo-splash-screen` — configured through `app.json` for the application splash screen.
 
-When you're ready, run:
+In addition, `@react-native-community/datetimepicker` is used for date selection on the availability screen.
 
-```bash
-npm run reset-project
+## Code structure
+
+```text
+src/
+├── app/                         # Expo Router routes
+│   ├── (auth)/                  # Login and registration
+│   └── (app)/                   # Authenticated area
+│       ├── (tabs)/              # Home, bookings, profile
+│       ├── facilities/[id].tsx  # Facility details
+│       └── booking/             # Availability, confirmation, status
+├── api/                         # HTTP client and error handling
+├── components/                  # Reusable UI and state components
+├── features/
+│   ├── facilities/              # Facility API, hooks, and components
+│   ├── bookings/                # Booking API, hooks, and components
+│   └── users/                   # Authentication API and hooks
+├── libs/                        # Secure storage and formatting helpers
+├── schemas/                     # Zod schemas
+├── stores/                      # Zustand stores
+├── theme/                       # Design tokens and theme provider
+└── types/                       # TypeScript API/domain types
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## API integration
 
-### Other setup steps
+The default API base URL follows the interview requirement:
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```text
+https://courtly-api.hyge.web.id
+```
 
-## Learn more
+The HTTP client is located in `src/api/client.ts`. Protected requests read the access token from Secure Store and send it using:
 
-To learn more about developing your project with Expo, look at the following resources:
+```http
+Authorization: Bearer <access-token>
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Integrated endpoints:
 
-## Join the community
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `POST` | `/v1/auth/register` | Create an account |
+| `POST` | `/v1/auth/login` | Log in |
+| `POST` | `/v1/auth/refresh` | Refresh the access token after a 401 response |
+| `GET` | `/v1/facilities` | Paginated and filtered facility list |
+| `GET` | `/v1/facilities/:id` | Facility details |
+| `GET` | `/v1/facilities/:id/availability?date=YYYY-MM-DD` | Availability for a date |
+| `GET` | `/v1/cities` | City filter data |
+| `GET` | `/v1/sports` | Sport filter data |
+| `POST` | `/v1/bookings` | Create a booking |
+| `GET` | `/v1/bookings` | List the user's bookings |
+| `GET` | `/v1/bookings/:id` | Booking details |
+| `DELETE` | `/v1/bookings/:id` | Cancel a booking |
 
-Join our community of developers creating universal apps.
+To override the API URL, create a `.env` file in the project root:
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```env
+EXPO_PUBLIC_API_URL=https://courtly-api.hyge.web.id
+```
+
+Restart the Expo development server after changing environment variables.
+
+## User flows
+
+### Authentication
+
+1. The user opens the login or registration screen.
+2. The form is validated with Zod.
+3. The access token and user profile are stored through Secure Store.
+4. Authentication state is managed by Zustand.
+5. Unauthenticated users are redirected to the login screen.
+
+### Browse facilities
+
+1. The Home screen loads facilities with pagination.
+2. Search uses a 400 ms debounce.
+3. Sports and cities are loaded from lookup endpoints.
+4. Pull-to-refresh and infinite scroll are supported.
+5. Tapping a facility opens its detail screen.
+
+### Booking
+
+1. From the facility detail screen, the user selects `Check Availability`.
+2. The user selects a date and an available slot for a court.
+3. The booking draft is temporarily stored in Zustand.
+4. The confirmation screen displays the facility, court, date, time, and price.
+5. `Confirm Payment` sends `POST /v1/bookings`.
+6. On success, the receipt screen displays the booking status and reference.
+
+### My bookings
+
+The Bookings tab supports `Upcoming`, `Past`, and `Cancelled` filters. Each booking displays the facility, court, date, time, status, reference, and cancellation action when applicable. Booking details are opened through the status/receipt screen.
+
+## Running the project
+
+### Prerequisites
+
+- Node.js `22.13.x` or a compatible later version for Expo SDK 57
+- npm
+- Android Studio and Android SDK for local Android development
+- A JDK compatible with the Android project configuration
+
+### Installation
+
+```bash
+npm install
+```
+
+### Start the development server
+
+```bash
+npm run start
+```
+
+Available commands:
+
+```bash
+npm run android  # Run on Android
+npm run ios     # Run on iOS
+npm run web     # Run on web
+npm run lint    # Run Expo lint
+```
+
+Make sure an Android emulator is running and the Android SDK environment is configured before using the Android command.
+
+## Building the Android APK
+
+The repository currently includes the APK at:
+
+```text
+release/courtly-release.apk
+```
+
+The build script configured in `devenv.nix` runs `expo prebuild`, `./gradlew assembleRelease`, and copies the generated APK to that path.
+
+Manual build steps:
+
+```bash
+npx expo prebuild --platform android
+cd android
+./gradlew assembleRelease
+mkdir -p ../release
+cp app/build/outputs/apk/release/app-release.apk ../release/courtly-release.apk
+```
+
+Note: the interview requirement specifies `releases/courtly-android.apk`, while the currently committed file is `release/courtly-release.apk`. If the submission must follow the required path exactly, copy or rename the APK to `releases/courtly-android.apk` before the final push.
+
+## Error handling and loading states
+
+- API errors are mapped to `ApiError` with status, code, and message.
+- Queries use limited retries for non-401 errors.
+- Error states provide a retry action.
+- An empty state is shown when a query returns no results.
+- Loading states are shown during initial loading and pagination.
+- Requests receiving a 401 response attempt to refresh the token; if refreshing fails, the session is cleared and the user is redirected to login.
+
+## Current implementation notes
+
+- The API base URL is read from `EXPO_PUBLIC_API_URL`; make sure it is available for production builds.
+- Dark/light theme support is available on the auth screens and theme tokens are used throughout the UI.
+- The application includes a payment confirmation UI, but does not integrate an external payment gateway because the interview API only provides booking endpoints.
+- Refresh-token persistence should be verified before a production release if the API requires refresh tokens. Refresh handling is already present in the HTTP client.
+- To satisfy the APK requirement literally, the APK location should be aligned with `releases/courtly-android.apk`.
+
+## API references
+
+- Base API: <https://courtly-api.hyge.web.id>
+- Swagger: <https://courtly-api.hyge.web.id/api/docs>
+- Expo SDK 57: <https://docs.expo.dev/versions/v57.0.0/>
+
