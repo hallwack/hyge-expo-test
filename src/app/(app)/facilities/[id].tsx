@@ -1,12 +1,19 @@
 import ErrorState from "@/components/custom/error";
 import LoadingState from "@/components/custom/loading";
+import { Button } from "@/components/ui/button";
 import CourtRow from "@/features/facilities/components/court-row";
 import FacilityDetailHero from "@/features/facilities/components/facility-detail-hero";
 import { useFacility } from "@/features/facilities/hooks";
 import { useTheme } from "@/theme/ThemeProvider";
-import { useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { CheckCircleIcon } from "lucide-react-native";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function FacilityDetail() {
@@ -106,25 +113,15 @@ export default function FacilityDetail() {
           },
         ]}
       >
-        <Pressable
-          style={({ pressed }) => [
-            styles.ctaButton,
-            {
-              backgroundColor: tokens.primary,
-              borderRadius: tokens.radius.md,
-              opacity: pressed ? 0.9 : 1,
-            },
-          ]}
-          onPress={() =>
-            console.log("Navigating to booking for facility", facility.id)
-          }
+        <Link
+          href={{
+            pathname: "/(app)/booking/[facilityId]",
+            params: { facilityId: facility.id },
+          }}
+          asChild
         >
-          <Text
-            style={[styles.ctaText, { color: tokens["primary-foreground"] }]}
-          >
-            Check Availability
-          </Text>
-        </Pressable>
+          <Button>Check Availability</Button>
+        </Link>
       </View>
     </View>
   );
