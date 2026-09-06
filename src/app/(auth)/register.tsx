@@ -5,7 +5,6 @@ import { useTheme } from "@/theme/ThemeProvider";
 import { useRouter } from "expo-router";
 import { ChevronLeftIcon } from "lucide-react-native";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -15,33 +14,25 @@ import {
 import { useForm } from "react-hook-form";
 import { registerSchema, RegisterSchema } from "@/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRegister } from "@/features/users/hooks";
 
 export default function Register() {
   const router = useRouter();
   const { tokens } = useTheme();
+  const { mutate, isPending } = useRegister();
 
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
     },
   });
-
-  const onSubmit = async (data: RegisterSchema): Promise<void> => {
-    try {
-      await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-      console.log("Register data:", data);
-      router.replace("/(auth)/login");
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "Terjadi kesalahan";
-      Alert.alert("Gagal", message);
-    }
-  };
 
   const backButtonHandler = () => {
     router.back();
@@ -71,7 +62,7 @@ export default function Register() {
           <Input
             ref={ref}
             placeholder="Your Name"
-            secureTextEntry
+            keyboardType="default"
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -112,8 +103,8 @@ export default function Register() {
       <Button
         variant="default"
         size="default"
-        onPress={handleSubmit(onSubmit)}
-        isLoading={isSubmitting}
+        onPress={handleSubmit((value) => mutate(value))}
+        isLoading={isPending}
         style={{ marginTop: 8 }}
       >
         Register
