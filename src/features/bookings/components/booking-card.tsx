@@ -41,7 +41,7 @@ export default function BookingCard({
     <Link
       href={{
         pathname: "/(app)/booking/status",
-        params: { bookingId: booking.id },
+        params: { bookingId: booking.id, from: "list" },
       }}
       asChild
     >
