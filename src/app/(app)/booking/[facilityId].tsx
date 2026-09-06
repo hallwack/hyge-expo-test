@@ -4,24 +4,23 @@ import LoadingState from "@/components/custom/loading";
 import { Button } from "@/components/ui/button";
 import DateInput from "@/components/ui/date-input";
 import AvailabilityView from "@/features/bookings/components/availability-view";
-import { useAvailability } from "@/features/facilities/hooks";
+import { useAvailability, useFacility } from "@/features/facilities/hooks";
 import { formatDate } from "@/libs/format";
+import { useBookingStore } from "@/stores/booking-store";
 import { useTheme } from "@/theme/ThemeProvider";
 import { AvailabilityCourt, AvailabilitySlot } from "@/types/availability";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from "react-native";
+import { useEffect, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function FacilityBooking() {
   const { facilityId } = useLocalSearchParams<{ facilityId: string }>();
 
   const router = useRouter();
   const { tokens } = useTheme();
+
+  const setBookingDraft = useBookingStore((state) => state.setBookingDraft);
+  const clearBookingDraft = useBookingStore((state) => state.clearBookingDraft);
 
   const [bookingDate, setBookingDate] = useState<Date>(new Date());
   const [selectedBooking, setSelectedBooking] = useState<{
@@ -37,6 +36,8 @@ export default function FacilityBooking() {
     error,
     refetch,
   } = useAvailability(facilityId, formattedBookingDate);
+
+  const { data: facilityDetail } = useFacility(facilityId);
 
   const handleDateChange = (newDate: Date) => {
     setBookingDate(newDate);
@@ -63,19 +64,36 @@ export default function FacilityBooking() {
   };
 
   const handleBookingSubmit = () => {
-    if (!selectedBooking) return;
+    if (!selectedBooking || !facilityDetail) return;
 
-    const payload = {
-      facilityId,
-      courtId: selectedBooking.court.id,
-      date: formattedBookingDate,
-      startTime: selectedBooking.slot.startTime,
-      endTime: selectedBooking.slot.endTime,
+    setBookingDraft({
+      payload: {
+        courtId: selectedBooking.court.id,
+        date: formattedBookingDate,
+        startTime: selectedBooking.slot.startTime,
+        endTime: selectedBooking.slot.endTime,
+      },
+      facility: {
+        id: facilityDetail.id,
+        name: facilityDetail.name,
+        imageUrl: facilityDetail.imageUrl,
+      },
+      court: {
+        id: selectedBooking.court.id,
+        name: selectedBooking.court.name,
+      },
       price: selectedBooking.slot.price,
-    };
+    });
 
-    console.log("Submit Payload:", payload);
+    router.push("/booking/confirmation");
   };
+
+  useEffect(() => {
+    return () => {
+      clearBookingDraft();
+      setSelectedBooking(null);
+    };
+  }, [clearBookingDraft]);
 
   return (
     <View style={[styles.container, { backgroundColor: tokens.background }]}>
