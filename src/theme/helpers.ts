@@ -1,5 +1,3 @@
-// theme/helpers.ts
-
 /**
  * Utility function to conditionally join CSS class names
  * @param classes - Array of class names or falsy values
