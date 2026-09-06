@@ -7,13 +7,7 @@ import { useFacility } from "@/features/facilities/hooks";
 import { useTheme } from "@/theme/ThemeProvider";
 import { Link, useLocalSearchParams } from "expo-router";
 import { CheckCircleIcon } from "lucide-react-native";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function FacilityDetail() {
