@@ -1,4 +1,4 @@
-import { priceFormat } from "@/libs/price-format";
+import { priceFormat } from "@/libs/format";
 import { Tokens } from "@/theme/tokens";
 import { Court, FacilityType } from "@/types/facility";
 import { StyleSheet, Text, View } from "react-native";

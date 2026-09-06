@@ -1,4 +1,4 @@
-import { priceFormat } from "@/libs/price-format";
+import { priceFormat } from "@/libs/format";
 import { Tokens } from "@/theme/tokens";
 import { Facility } from "@/types/facility";
 import { Link } from "expo-router";
