@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-} from "react-native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTheme } from "@/theme/ThemeProvider";
 import { BookingStatus } from "@/types/booking";
@@ -15,6 +8,7 @@ import ErrorState from "@/components/custom/error";
 import { CheckIcon } from "lucide-react-native";
 import { priceFormat } from "@/libs/format";
 import { Button } from "@/components/ui/button";
+import SafeImage from "@/components/custom/safe-image";
 
 export default function BookingStatusPage() {
   const router = useRouter();
@@ -45,11 +39,11 @@ export default function BookingStatusPage() {
   const getStatusBadge = (status: BookingStatus) => {
     switch (status) {
       case "CONFIRMED":
-        return { label: "Dikonfirmasi", bg: "#DCFCE7", text: "#15803D" };
+        return { label: "Confirmed", bg: "#DCFCE7", text: "#15803D" };
       case "COMPLETED":
-        return { label: "Selesai", bg: "#E0F2FE", text: "#0369A1" };
+        return { label: "Completed", bg: "#E0F2FE", text: "#0369A1" };
       case "CANCELLED":
-        return { label: "Dibatalkan", bg: "#FEE2E2", text: "#B91C1C" };
+        return { label: "Cancelled", bg: "#FEE2E2", text: "#B91C1C" };
       default:
         return {
           label: status,
@@ -115,10 +109,14 @@ export default function BookingStatusPage() {
           <View style={[styles.dashedLine, { borderColor: tokens.border }]} />
 
           <View style={styles.facilitySection}>
-            <Image
-              source={{ uri: bookingData.facility.imageUrl }}
+            <SafeImage
+              source={bookingData.facility.imageUrl}
               style={[styles.image, { borderRadius: tokens.radius.md }]}
+              iconSize={32}
+              iconColor={tokens["muted-foreground"]}
+              backgroundColor={tokens.muted}
             />
+
             <View style={{ flex: 1, gap: 4 }}>
               <Text
                 style={[
